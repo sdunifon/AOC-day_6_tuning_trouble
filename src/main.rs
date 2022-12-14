@@ -12,8 +12,8 @@ fn main() {
     let position1 = find_marker::<first_window_size>(PUZZLE_INPUT).unwrap();
     let position2 = find_marker::<second_window_size>(PUZZLE_INPUT).unwrap();
 
-    println!("window size {} position: {}", first_window_size, position);
-    println!("window size {} position: {}", second_window_size, position);
+    println!("window size {} position: {}", first_window_size, position1);
+    println!("window size {} position: {}", second_window_size, position2);
 
 }
 
