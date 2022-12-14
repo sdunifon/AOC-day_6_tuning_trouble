@@ -9,22 +9,22 @@ fn main() {
     let chars = str.as_bytes();
     let slice = ['r','u','s','t'];
 
-    find_marker(INPUT1);
+    find_marker::<4>(INPUT1);
 
     
 }
 
-fn find_marker(string:&str){
-    string.as_bytes().windows(4).enumerate().for_each(|(i, window)| {
+fn find_marker<const WINDOW_SIZE: usize>(string:&str) -> Result<u32, Box<dyn std::error::Error>> {//Result<u32, &'static str> {
+    // string.as_bytes().windows(4).enumerate().for_each(|(i, window)| {
+    for (i, window) in string.as_bytes().windows(WINDOW_SIZE).enumerate() {
         if window.is_unique() {
             println!("is unique{}: {}", i, window.iter().map(|&c| c as char).collect::<String>());
+             return Ok((i  + WINDOW_SIZE) as u32);
         }else{
             println!("not unique{}: {}", i, window.iter().map(|&c| c as char).collect::<String>());
         }
-        // let a = window.iter().map(|&x| x as char).collect::<String>();
-        //     println!("Found at {},{:?}--{}", i, window,a);
-    });
-
+    };
+    Err("no unique sequence found".into())
 }
 trait Iterable<'a> {
     type ItemType;
@@ -131,5 +131,31 @@ mod tests {
         assert_eq!(v.is_unique(), true);
         v.push(1);
         assert_eq!(v.is_unique(), false);
+    }
+
+    #[test]
+    fn test_marker_a() {
+        let str = "mjqjpqmgbljsphdztnvjfqwrcgsmlb";
+        assert_eq!(find_marker::<4>(str).unwrap(), 7)
+    }
+    #[test]
+    fn test_marker_b() {
+        let str = "bvwbjplbgvbhsrlpgdmjqwftvncz";
+        assert_eq!(find_marker::<4>(str).unwrap(), 5)
+    }
+    #[test]
+    fn test_marker_c() {
+        let str = "nppdvjthqldpwncqszvftbrmjlhg";
+        assert_eq!(find_marker::<4>(str).unwrap(), 6)
+    }
+    #[test]
+    fn test_marker_d() {
+        let str = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg";
+        assert_eq!(find_marker::<4>(str).unwrap(), 10)
+    }
+    #[test]
+    fn test_marker_e() {
+        let str = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw";
+        assert_eq!(find_marker::<4>(str).unwrap(), 11)
     }
 }
