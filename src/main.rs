@@ -1,3 +1,4 @@
+#![feature(associated_type_bounds)]
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::slice::Windows;
@@ -25,22 +26,23 @@ fn find_marker(string:&str){
     });
 
 }
-trait Iterable {
+trait Iterable<'a> {
     type ItemType;
 
     type IterType: Iterator<Item = Self::ItemType>;
 
-    fn into_iter(self) -> Self::IterType;
+    fn into_iter(&'a self) -> Self::IterType;
 }
 
-trait Uniqueness: Iterable
+trait Uniqueness<'a>: Iterable<'a>
 {
     // type Bitem;
     // fn is_unique(&self) -> bool;
 
-    fn is_unique(&self) -> bool
+    fn is_unique(&'a self) -> bool
     // where Self::Bitem: Eq + Hash,
-    where <Self as Iterable>::ItemType: Hash + Eq,
+    where <Self as Iterable<'a>>::ItemType: Hash + Eq,
+          Self: Sized,
     {
         let iter = self.into_iter();
 
@@ -57,44 +59,30 @@ trait Uniqueness: Iterable
 
 }
 
-impl<T> Iterable for Vec<T> {
-
-    fn into_iter(self) -> Self::IterType {
-        todo!()
-    }
-}
-
-impl<T> Uniqueness for Vec<T>{
-
-}
-
-impl<'a,T> Iterable for &'a [T] {
+impl<'a,T: 'a> Iterable<'a> for Vec<T> {
     type ItemType = &'a T;
-
     type IterType = Iter<'a, T>;
 
-    fn into_iter(self) -> Self::IterType {
+    fn into_iter(&'a self) -> Self::IterType {
+        // let a : IntoIterator
         self.iter()
     }
 }
 
-// impl IntoIterator for &[T]{
-//     type Item = <std::slice::Iter<'a, i32> as Iterator>::Item;
-//     type IntoIter = std::slice::Iter<'a, i32>;
-//
-//     fn into_iter(self) -> Self::IntoIter {
-//         self.data.as_slice().into_iter()
-//     }
-//
-// }
-// impl<T> Iterable for &[T]
-// where Self: IntoIterator,
-// {
-//     type InnerItem = T;
-//     fn new_iter(&self) -> Iter<'_, Self::InnerItem> {
-//         self.iter()
-//     }
-// }
+impl<'a, T: 'a> Uniqueness<'a> for Vec<T>{
+
+}
+
+impl<'a,T> Iterable<'a> for &'a [T] {
+    type ItemType = &'a T;
+
+    type IterType = Iter<'a, T>;
+
+    fn into_iter(&self) -> Self::IterType {
+        self.iter()
+    }
+}
+
 
 // impl<T, const SIZE: usize> Iterable for [T; SIZE] {
 //     type IterType = Iter< T>;
@@ -105,7 +93,7 @@ impl<'a,T> Iterable for &'a [T] {
 // }
 
 // impl <T, const SIZE: usize> Uniqueness for [T; SIZE] {}
-impl <T> Uniqueness for &[T]
+impl<'a,T> Uniqueness<'a> for &'a [T]
     where T: Hash + Eq,
 {
     // type Bitem = T;
@@ -127,15 +115,15 @@ impl <T> Uniqueness for &[T]
 mod tests {
     use std::{assert_eq, vec};
     use super::*;
-    #[test]
-    #[ignore]
-    fn test_is_unique() {
-        // let mut v1:[u8;5]  = [1, 2, 3, 4, 5];
-        // v1.is_unique();
-        // assert_eq!(v1.is_unique(), true);
-        // let mut v2  = [1, 2, 3, 4, 5,1];
-        // assert_eq!(v2.is_unique(), false);
-    }
+    // #[test]
+    // #[ignore]
+    // fn test_is_unique() {
+    //     // let mut v1:[u8;5]  = [1, 2, 3, 4, 5];
+    //     // v1.is_unique();
+    //     // assert_eq!(v1.is_unique(), true);
+    //     // let mut v2  = [1, 2, 3, 4, 5,1];
+    //     // assert_eq!(v2.is_unique(), false);
+    // }
     #[test]
     fn test_is_unique_vec() {
         let mut v = vec![1, 2, 3, 4, 5];
